@@ -12,3 +12,5 @@
 ## 2D Cell Automaton
 ![image](https://user-images.githubusercontent.com/48379338/122667947-8a71c480-d1f0-11eb-8d30-b8a1693c5785.png)
 ![image](https://user-images.githubusercontent.com/48379338/122667952-91003c00-d1f0-11eb-9804-76fe71e5f5ca.png)
+## Julia Set
+![result](https://user-images.githubusercontent.com/48379338/122692583-e845f100-d270-11eb-80d8-1ac0987ebd4e.png)
