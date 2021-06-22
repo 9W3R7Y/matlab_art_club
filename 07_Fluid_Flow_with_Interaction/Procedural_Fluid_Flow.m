@@ -1,19 +1,20 @@
-ammountN    =  100;
-n_tiles     =     7;
+
+ammountN    =  291.3;
+n_tiles     =     5;
 n_octaves   =   28;
-persistence = 0.5;
+persistence = 0.953;
 seed        =   69;
 
-ammountH    =  363.3;
+ammountH    =  1000;
 
-ammountO    =  0.158;
-sigma       =  50 ;
+ammountO    =  0.007;
+sigma       =  83.22 ;
 
 size        =  4096;
-n_particles =  500000;
-vel         =  8.74;
-step        =  10;
-END_TIME =     20;
+n_particles = 163300;
+vel         = 5.65;
+step        =  100;
+END_TIME =     50;
 
 x = (1:size)/size-1/2;
 y = transpose((1:size)/size-1/2);
@@ -39,27 +40,30 @@ Object = imresize( ...
         ,[size,size]);
 Edge =  edge(Object);
 Psi_O = imgaussfilt(transpose( ...
-        double(Object)),sigma);
-    
-Psi = vel*(Psi_N*ammountN+Psi_H*ammountH).*(1-0.005*Psi_O);
+        double(Object)),sigma,"FilterSize",1025);
+
+Psi = vel*(Psi_N*ammountN+Psi_H*ammountH).*(1-Psi_O*ammountO);
 
 [dPsidx,dPsidy] = gradient(Psi);
-vx =   dPsidx*size+size/2;
-vy =  -dPsidy*size+size/2;
+vx =   dPsidx./sqrt(dPsidx.^2+dPsidy.^2)*size;
+vy =  -dPsidy./sqrt(dPsidx.^2+dPsidy.^2)*size;
 
 %{
-fig1 = figure('Position',[0,0,500,500]);
-imagesc(255*Psi);
-colormap gray;
+fig = figure('Position',[0,0,400,200]);
+tiledlayout(1,2);
+nexttile;
+imagesc(Psi);
+nexttile;
+contour(transpose(Psi));
 %}
 
 dt = 1/60;
-px = size*rand(n_particles,1)*0.4;
+px = size*rand(n_particles,1)*0.3;
 [py,pidxs] = sort(size*rand(n_particles,1));
 pc = 1:n_particles;
 pc = pc(pidxs);
 
-fig2 = figure('Position',[0,0,500,500]);
+fig = figure('Position',[0,0,500,500]);
 for t = 1:END_TIME*step
     px_grid = round(px);
     py_grid = round(py);
@@ -75,22 +79,20 @@ for t = 1:END_TIME*step
         hold on
         image(255*(1-Object));
         colormap gray;
-        scatter(px,py,1,pc,".","CData",jet(n_particles));
+        scatter(px,py,1,pc,".","CData",hsv(n_particles));
         xlim([0 size]);
         ylim([0 size]);
         pbaspect([1 1 1]);
         axis off
         hold off
         drawnow;
-        
-        saveas(fig2,"results\"+num2str(t/step,'%04.f')+".png");
-        
     end
         
-    idxs = [px_grid py_grid];
-    pvx = vx(idxs);
-    pvy = vy(idxs);
+    for i = 1:n_particles
+        pvx = vx(px_grid(i),py_grid(i));
+        pvy = vy(px_grid(i),py_grid(i));
         
-    px = px + pvx * dt / step;
-    py = py + pvy * dt / step;
+        px(i) = px(i) + pvx * dt / step;
+        py(i) = py(i) + pvy * dt / step;
+    end 
 end
